@@ -24,20 +24,6 @@ Run:
 docker volume create --name safecoin-data
 docker run --restart always -p 8770:8770 -v safecoin-data:/safecoin --name=safecoin -d safecoin/safecoin
 ```
-#### ARM (BETA)
-To run the beta version of the daemon on ARM use `safecoin/safecoin:arm-beta` as image.
-
-> Note: if you want to set a particular option to safecoind you can pass it as argument to `docker run`.
->
-> For example, if you want to reduce the RAM usage you reduce [-dbcache](https://github.com/Fair-Exchange/safecoin/blob/master/doc/reducing-memory-usage.md) running:
->
-> ```
-> docker run --restart always -p 8770:8770 -v safecoin-data:/safecoin --name=safecoin -d safecoin/safecoin -dbcache=4
-> ```
->
-> If you already have a running container you can stop it, edit `safecoin.conf` in your volume and start it or you can remove it and create a new one with different options.
->
-> **:warning: removing a container which doesn't use volume to store data will inevitably lead to data loss!**
 
 ### Build from sources (expert users)
 ```
