@@ -1,6 +1,7 @@
 FROM ubuntu:18.04
 
 ARG VERSION=master
+ARG HOST
 
 ENV HOME /safecoin
 WORKDIR /safecoin
