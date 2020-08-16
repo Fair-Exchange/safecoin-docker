@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Allow obfs4proxy to bind to ports < 1024.
     setcap cap_net_bind_service=+ep /usr/bin/obfs4proxy && \
 # Clean image
-    apt-get purge curl gpg gpg-agent && \
+    apt-get purge -y curl gpg gpg-agent && \
     apt-get -y autoremove && apt-get clean && \
     rm -rf /var/lib/apt/lists/* /var/tmp/* /tmp/* /root/.gnugp
 
