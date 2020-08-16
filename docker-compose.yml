@@ -1,0 +1,35 @@
+version: "3.4"
+services:
+  safecoin:
+    image: safecoin/safecoin
+    command: -onion=172.28.1.2
+    depends_on:
+      - tor
+    networks:
+      net:
+        ipv4_address: 172.28.1.1
+    ports:
+      - "8770:8770"
+    volumes:
+      - safecoin-data:/safecoin
+    restart: unless-stopped
+    stop_grace_period: 2m
+  tor:
+    build: ./tor
+    networks:
+      net:
+        ipv4_address: 172.28.1.2
+    volumes:
+      - tor-data:/var/lib/tor
+    restart: unless-stopped
+
+volumes:
+  safecoin-data:
+  tor-data:
+
+networks:
+  net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

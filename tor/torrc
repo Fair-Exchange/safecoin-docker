@@ -1,0 +1,4 @@
+SocksPort 0.0.0.0:9050
+HiddenServiceDir /var/lib/tor/safecoin-node/
+HiddenServicePort 8770 172.28.1.1:8770
+HiddenServiceVersion 2

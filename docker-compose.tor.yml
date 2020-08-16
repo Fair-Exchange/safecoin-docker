@@ -1,0 +1,6 @@
+version: "3.4"
+services:
+  safecoin:
+    command: -tornode -proxy=172.28.1.2:9050 -listen -listenonion=0
+    volumes:
+      - tor-data:/var/lib/tor

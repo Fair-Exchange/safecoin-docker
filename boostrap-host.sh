@@ -1,35 +1,98 @@
 #!/bin/bash
-# SafeNode Container boostrap script
 
 set -e
 
-echo "# SafeNode Container boostrap script"
+echo "=== SafeNode Container boostrap script ==="
 echo
-echo -n "- "; docker -v 2> /dev/null || (echo "[!!!] Docker is needed. Please follow https://docs.docker.com/get-docker/ to install it" && false)
+echo -n "- "; docker -v 2> /dev/null || (echo "[ERR] Docker is needed. Please follow https://docs.docker.com/get-docker/ to install it" && false)
 echo
-echo "[...] Checking that enough memory is available, if not a swap file will be created."
 
-memtotal=$(grep ^MemTotal /proc/meminfo | awk '{print int($2/1024) }')
-
-if [ $memtotal -lt 2048 -a $(swapon -s | wc -l) -lt 2 ]; then
-    if [[ $EUID -ne 0 ]]; then
-        echo "You don't have enough memory and the script doesn't have the permissions to allocate swap. Please run this script again as root."
-        exit 1
-    fi
-    fallocate -l 2048M /swap || dd if=/dev/zero of=/swap bs=1M count=2048
-    mkswap /swap
-    grep -q "^/swap" /etc/fstab || echo "/swap swap swap defaults 0 0" >> /etc/fstab
-    swapon -a
-fi
-
-echo "Creating docker volume for data"
-if [ $(docker volume ls -f name=safecoin | wc -l) -ge 2 ]; then
-    echo "[!!!] You already have a SafeNode container. If you want to create a new one read https://github.com/Fair-Exchange/safecoin-docker/#I-want-to-run-multiple-SafeCoin-daemons-on-my-Docker"
+ramtotal=$(grep ^MemTotal /proc/meminfo | awk '{print int($2/1024) }')
+swaptotal=$(swapon -s | sed '1d' | awk '{ print int($3/1024) }')
+memtotal=$(expr $ramtotal + $swaptotal)
+if [ $memtotal -lt 2530 ]; then
+    echo "You don't have enough memory to run a SafeCoin daemon. You need at least 3GB of memory."
     exit 1
 fi
 
-docker volume create --name=safecoin-data
-docker run --restart always -v safecoin-data:/safecoin --name=safecoin -d safecoin/safecoin
+read -p "Do you want to run a SafeNode [y/N]: " safenode
+if [[ "$safenode" == [Yy] ]]; then
+    EXTRAFILES="-f docker-compose.safenode.yml"
+    default_prefix="safenode"
+else
+    default_prefix="safecoin"
+fi
 
-echo "=== Container is running ==="
-echo "Follow these steps to end configuration: https://github.com/Fair-Exchange/safecoin-docker/#Configure-the-container"
+read -p "Containers prefix [$default_prefix]: " container_prefix
+if [ -s $container_prefix ]; then
+    container_prefix="$default_prefix"
+fi
+
+read -p "Do you want to create a Tor node [Y/n]: " tor
+if [[ "$tor" =~ ^(Y|y)*$ ]]; then
+    EXTRAFILES="$EXTRAFILES -f docker-compose.tor.yml"
+fi
+
+read -p "Do you want to help fighting censorship (you will need to make ports 8772/8773 reachables from the internet) [Y/n]: " anticensorship
+if [[ "$anticensorship" =~ ^(Y|y)*$ ]]; then
+    read -p "Email address to allow Tor team to contact you if there are problems with your bridge (optional): " EMAIL
+    EXTRAFILES="$EXTRAFILES -f docker-compose.fightcens.yml"
+fi
+echo
+
+docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES build --pull
+docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES up -d
+
+
+if [[ "$safenode" == [Yy] ]]; then
+    echo
+    echo "=== SafeNode Setup ==="
+    if [ $(docker-compose -p $container_prefix exec safecoin \[ -s /safecoin/.safecoin/safecoin.conf \]) -eq 0 ]; then
+        echo "Your SafeNode seems to be already configured."
+        echo "To reconfigure it, runs: docker-compose -p $container_prefix exec setup-safenode.sh"
+    fi
+    docker-compose -p $container_prefix exec setup-safenode.sh
+    docker-compose -p $container_prefix restart safecoin
+fi
+
+echo
+echo "=== Container configuration ===="
+echo "CONTAINER PREFIX: $container_prefix"
+if [[ "$tor" =~ ^(Y|y)*$ ]]; then
+    echo -n "TOR NODE ADDRESS: "
+    while [ -z "$tor_address" ]; do
+        tor_address=$(docker-compose -p $container_prefix exec tor cat /var/lib/tor/safecoin-node/hostname 2> /dev/null || echo)
+        sleep 1
+    done
+    echo $tor_address
+fi
+
+echo -n "SAFECOIN ADDRESS: "
+while [ ${#safecoin_address} -ne 34 ]; do
+    safecoin_address=$(docker-compose -p $container_prefix exec safecoin safecoin-cli listreceivedbyaddress 0 true | grep address | cut -c17-50)
+    sleep 1
+done
+echo $safecoin_address
+
+if [[ "$anticensorship" =~ ^(Y|y)*$ ]]; then
+    echo
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo "!!! REMEMBER TO OPEN TCP PORTS 8772/8773 TO HELP !!!"
+    echo "!!!  CENSORED USERS CONNECT TO THE TOR NETWORK   !!!"
+    echo "!!!     THROUGH YOUR OBFS4 BRIDGE TO BYPASS      !!!"
+    echo "!!!        CENSORSHIP AND SURVEILLANCE!          !!!"
+    echo "!!!! TEST: https://bridges.torproject.org/scan/ !!!!"
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    echo
+fi
+
+echo
+echo "Useful commmands:"
+echo "- Stop the containers: docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES stop"
+echo "- Start the containers: docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES start"
+echh "- Delete the containers (add -v to delete data too): docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES down"
+echo "- Backup your container's wallet: docker cp $(echo $container_prefix)_safecoin_1:/safecoin/.safecoin/wallet.dat ."
+echo "- Update SafeCoin: run this script again."
+
+echo
+echo "=== Containers are running ==="

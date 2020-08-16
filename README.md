@@ -4,67 +4,50 @@
 Docker image that runs SafeCoin daemon in a container for easy deployment.
 
 ## Installation
-### Requirements
-#### [Install Docker](https://docs.docker.com/get-docker/)
+**Before to continue, be sure to have at least 3GB free (RAM+SWAP)**
 
 ### Fast setup
-**If you are on ARM you have to use manual setup with `safecoin/safenode:arm-beta` as image.**
-
-Run as root:
+Run and follow instructions.
 ```
-curl https://raw.githubusercontent.com/Fair-Exchange/safecoin-docker/master/boostrap-host.sh | sh
+./boostrap-host.sh
 ```
-###### root is needed for swap creation and systemd service. If you have enough memory and the user has the permission to run a docker container, you can run it as normal user.
 
 ### Manual setup
-**Before to start the container, be sure to have at least 3GB free (RAM+SWAP)**
 
-Run:
+We have 4 docker-compose files:
+- `docker-compose.yml`: base.
+- `docker-compose.safenode.yml`: includes some scripts to help running a SafeNode
+- `docker-compose.tor.yml`: fully run the daemon under Tor. The node will be reachable through a hidden service.
+- `docker-compose.fightcens.yml`: run a [OBFS4 bridge](https://github.com/Yawning/obfs4/blob/master/doc/obfs4-spec.txt) and a [SnowFlake proxy](https://snowflake.torproject.org/) to help fighting censorship. Both are secure to run. You will need to make TCP ports 8772/8773 reachables from the internet **before running the container**.
+
+Choose the ones you need and run:
 ```
-docker volume create --name safecoin-data
-docker run --restart always -p 8770:8770 -v safecoin-data:/safecoin --name=safecoin -d safecoin/safecoin
+docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.tor.yml] [-f docker-compose.fightcens.yml] build --pull
+docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.tor.yml] [-f docker-compose.fightcens.yml] up -d
 ```
+**Warning: file order is important. For example, running `docker-compose -f docker-compose.tor.yml -f docker-compose.yml` would be the same to run `docker-compose -f docker-compose.yml`.**
 
-> Note: if you want to set a particular option to safecoind you can pass it as argument to `docker run`.
->
-> For example, if you want to reduce the RAM usage you reduce [-dbcache](https://github.com/Fair-Exchange/safecoin/blob/master/doc/reducing-memory-usage.md) running:
->
-> ```
-> docker run --restart always -p 8770:8770 -v safecoin-data:/safecoin --name=safecoin -d safecoin/safecoin -dbcache=4
-> ```
->
-> If you already have a running container you can stop it, edit `safecoin.conf` in your volume and start it or you can remove it and create a new one with different options.
->
-> **:warning: removing a container which doesn't store data in a volume will remove all SafeCoin daemon's data!**
+If you need to run multiple SafeCoin instances, you will have to change `-p <name>` to avoid conflicts.
 
-### Build from sources (expert users)
-```
-curl -L https://github.com/Fair-Exchange/safecoin-docker/archive/master.tar.gz | tar xz
-cd safecoin-docker-master/
-docker build --tag safecoin:manualbuild .
-
-docker volume create --name safecoin-data
-docker run --restart always -p 8770:8770 -v safecoin-data:/safecoin --name=safecoin -d safecoin:manualbuild
-```
-
-**NOTE**: you can choose the source version passing `--build-args VERSION=v0.xx` to Docker Build, by default it compiles the up-to-date master branch.
+#### [Configure your SafeNode (optional)](#)
 
 #### Use safecoin-cli
 ```
-docker exec safecoin safecoin-cli <args>
+docker-compose -p safecoin exec safecoin safecoin-cli <args>
 ```
 
 #### Create a wallet backup
 ```
-docker cp safecoin:/safecoin/.safecoin/wallet.dat .
+docker cp safecoin_safecoin-1:/safecoin/.safecoin/wallet.dat .
 ```
 
-#### Gracefully shutdown the container
-If you stop the container with `docker stop`, safecoind will have 10s to terminate before to be brutally killed (SIGKILL). It's not a good way to stop a container. You should instead do:
+#### Stop the containers
 ```
-docker kill --signal=SIGTERM safecoind
-docker stop safecoind
+docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.fightcens.yml] stop
 ```
+
+#### Update the containers
+Run again setup will update container's image
 
 #### Keep the container up-to-date with systemd service
 :warning: THIS IS AN EXPERIMENTAL FEATURE, BE SURE TO HAVE A BACKUP OF YOUR WALLETS AND THE WILL TO FIGHT AGAINST BUGS
@@ -79,13 +62,15 @@ systemctl enable --now docker-safecoin.service
 ## FAQ
 #### Something went wrong, how can I see logs?
 ```
-docker logs safecoin
+docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.fightcens.yml] logs [-f] <service>
 ```
 You can use `--follow` argument to continue streaming the new output from the container’s STDOUT and STDERR.
 
+You can specify a service name (like `safecoin`) to see only logs related to that container
+
 #### I sadly need to debug. How can I spawn a shell into the container?
 ```
-docker exec -it safecoin bash
+docker-compose -p safecoin exec safecoin bash
 ```
 You will be on a Ubuntu image.
 
