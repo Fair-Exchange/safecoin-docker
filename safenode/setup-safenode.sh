@@ -47,7 +47,7 @@ fi
 mkdir ~/.safecoin || true
 
 read -p "Do you want to add nodes to speed up syncing? [Y/n]: " addnodes
-if [[ "$addnodes" =~ ^(Y|y)*$ ] ]]; then
+if [[ "$addnodes" =~ ^(Y|y)*$ ]]; then
     echo "addnode=explorer.safecoin.org
 addnode=explorer.deepsky.space
 addnode=dnsseed.local.support
