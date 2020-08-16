@@ -12,6 +12,8 @@ Run and follow instructions.
 ./boostrap-host.sh
 ```
 
+> If you are running a safenode, prefix will be `safenode` not `safecoin`
+
 ### Manual setup
 
 We have 4 docker-compose files:
@@ -29,7 +31,7 @@ docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml
 
 If you need to run multiple SafeCoin instances, you will have to change `-p <name>` to avoid conflicts.
 
-#### [Configure your SafeNode (optional)](#)
+#### [Configure your SafeNode (optional)](https://github.com/Fair-Exchange/safecoin-docker/tree/master/safenode#configure-the-container)
 
 #### Use safecoin-cli
 ```
