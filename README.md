@@ -16,6 +16,10 @@ Run and follow instructions.
 
 ### Manual setup
 
+#### [Configure OBFS4 bridges (optional)](https://github.com/Fair-Exchange/safecoin-docker/tree/master/tor#use-a-obfs4-bridge-to-circumvent-censorship)
+This is useful for users who needs to circumvent censorship (eg. who lives in China).
+
+#### Setup
 We have 4 docker-compose files:
 - `docker-compose.yml`: base.
 - `docker-compose.safenode.yml`: includes some scripts to help running a SafeNode

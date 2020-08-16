@@ -33,10 +33,16 @@ if [[ "$tor" =~ ^(Y|y)*$ ]]; then
     EXTRAFILES="$EXTRAFILES -f docker-compose.tor.yml"
 fi
 
-read -p "Do you want to help fighting censorship (you will need to make ports 8772/8773 reachables from the internet) [Y/n]: " anticensorship
-if [[ "$anticensorship" =~ ^(Y|y)*$ ]]; then
-    read -p "Email address to allow Tor team to contact you if there are problems with your bridge (optional): " EMAIL
-    EXTRAFILES="$EXTRAFILES -f docker-compose.fightcens.yml"
+read -p "Do you live in a location where Tor is censored? [y/N]: " censorship
+
+if [[ "$censorship" == [Yy] ]]; then
+    read -p "Follow these instructions: https://github.com/Fair-Exchange/safecoin-docker/tree/master/tor#use-a-obfs4-bridge-to-circumvent-censorship then press enter."
+else
+    read -p "Do you want to help fighting censorship (you will need to make ports 8772/8773 reachables from the internet) [Y/n]: " anticensorship
+    if [[ "$anticensorship" =~ ^(Y|y)*$ ]]; then
+        read -p "Email address to allow Tor team to contact you if there are problems with your bridge (optional): " EMAIL
+        EXTRAFILES="$EXTRAFILES -f docker-compose.fightcens.yml"
+    fi
 fi
 echo
 
