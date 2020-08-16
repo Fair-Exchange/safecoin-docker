@@ -96,7 +96,7 @@ echo
 echo "Useful commmands:"
 echo "- Stop the containers: docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES stop"
 echo "- Start the containers: docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES start"
-echh "- Delete the containers (add -v to delete data too): docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES down"
+echo "- Delete the containers (add -v to delete data too): docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES down"
 echo "- Backup your container's wallet: docker cp $(echo $container_prefix)_safecoin_1:/safecoin/.safecoin/wallet.dat ."
 echo "- Update SafeCoin: run this script again."
 
