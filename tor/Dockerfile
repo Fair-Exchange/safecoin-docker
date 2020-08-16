@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gpg \
     gpg-agent \
+    libcap2-bin \
     ca-certificates && \
 # See: <https://2019.www.torproject.org/docs/debian.html.en>
     curl https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --import && \
