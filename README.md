@@ -78,7 +78,7 @@ You can specify a service name (like `safecoin`) to see only logs related to tha
 ```
 docker-compose -p safecoin exec safecoin bash
 ```
-You will be on a Ubuntu image.
+You will be on a Debian Stable image.
 
 #### I have a problem or I can't find my question on FAQs
 Join on [Discord](https://discord.gg/c6hWAkQ) and ask there. Someone will help you for sure! :)
