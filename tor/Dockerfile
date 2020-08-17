@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=eschalot-builder /eschalot-master/eschalot /usr/bin/eschalot
 
-COPY torrc /etc/tor/torrc
+COPY torrc /etc/tor/torrc.default
 RUN chown -R debian-tor:debian-tor /etc/tor
 RUN chown debian-tor:debian-tor /var/log/tor
 
@@ -40,5 +40,3 @@ COPY docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
 USER debian-tor
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-
-CMD ["-f", "/etc/tor/torrc"]

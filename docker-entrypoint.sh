@@ -12,13 +12,21 @@ fetch-params.sh > /dev/null
 echo "Initialization completed successfully"
 echo
 
-if [ "$1" = "-tornode" ]; then
-    shift
-    EXTRA_ARGS="-externalip=$(cat /var/lib/tor/safecoin-node/hostname)"
+TOR_PROXY=$(getent hosts tor | awk '{ print $1 }')
+if [ ! -z "$TOR_PROXY" ]; then
+    if [ "$1" = "-tornode" ]; then
+        shift
+        EXTRA_ARGS="-proxy=$TOR_PROXY -externalip=$(cat /var/lib/tor/safecoin-node/hostname) -listen -listenonion=0"
+    else
+        EXTRA_ARGS="-onion=$TOR_PROXY"
+    fi
+else
+    echo "Tor support is disabled because not Tor proxy has been found."
+    echo
 fi
 
 echo "****************************************************"
-echo "Running: safecoind $@ $EXTRA_ARGS"
+echo "Running: safecoind $EXTRA_ARGS $@"
 echo "****************************************************"
 
-exec safecoind $@ $EXTRA_ARGS
+exec safecoind $EXTRA_ARGS $@
