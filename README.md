@@ -21,7 +21,7 @@ This is useful for users who needs to circumvent censorship (eg. who lives in Ch
 
 #### Setup
 We have 4 docker-compose files:
-- `docker-compose.yml`: base.
+- `docker-compose.yml`: base. This *must* always be included.
 - `docker-compose.safenode.yml`: includes some scripts to help running a SafeNode
 - `docker-compose.tor.yml`: fully run the daemon under Tor. The node will be reachable through a hidden service.
 - `docker-compose.fightcens.yml`: run a [OBFS4 bridge](https://github.com/Yawning/obfs4/blob/master/doc/obfs4-spec.txt) and a [SnowFlake proxy](https://snowflake.torproject.org/) to help fighting censorship. Both are secure to run. You will need to make TCP ports 8772/8773 reachables from the internet **before running the container**.
