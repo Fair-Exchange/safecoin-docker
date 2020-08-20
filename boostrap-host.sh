@@ -31,6 +31,7 @@ fi
 read -p "Do you want to create a Tor node [Y/n]: " tor
 if [[ "$tor" =~ ^(Y|y)*$ ]]; then
     EXTRAFILES="$EXTRAFILES -f docker-compose.tor.yml"
+    SAFEPORT="${SAFEPORT:-$RANDOM}"
 fi
 
 read -p "Do you live in a location where Tor is censored? [y/N]: " censorship
@@ -72,6 +73,11 @@ if [[ "$tor" =~ ^(Y|y)*$ ]]; then
     done
     echo $tor_address
 fi
+
+echo "Fetching params... (this operation could take a while)"
+while [ ! -z "$(docker-compose -p $container_prefix top safecoin | grep fetch-params)" ]; do
+    sleep 1
+done
 
 echo -n "SAFECOIN ADDRESS: "
 while [ ${#safecoin_address} -ne 34 ]; do
