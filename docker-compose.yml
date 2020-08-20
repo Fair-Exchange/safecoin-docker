@@ -5,7 +5,7 @@ services:
     depends_on:
       - tor
     ports:
-      - "8770:8770"
+      - "${SAFEPORT:-8770}:8770"
     volumes:
       - safecoin-data:/safecoin
     restart: unless-stopped

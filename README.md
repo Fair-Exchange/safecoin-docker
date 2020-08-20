@@ -55,6 +55,14 @@ docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.fightcens.ym
 #### Update the containers
 Run again setup will update container's image
 
+#### Running multiple instances
+To run multiple instanced, you'll need to use SAFEPORT chainging the daemon's listening port in order to avoid conflicts with other containers. Example:
+```
+SAFEPORT=8774 docker-compose -p safecoin2 -f docker-compose.yml [...] up -d
+```
+will run a new SafeCoin daemon on port 8774.
+
+
 #### Keep the container up-to-date with systemd service
 :warning: THIS IS AN EXPERIMENTAL FEATURE, BE SURE TO HAVE A BACKUP OF YOUR WALLETS AND THE WILL TO FIGHT AGAINST BUGS
 
