@@ -3,8 +3,7 @@
 set -e
 
 cp /etc/tor/torrc.default /etc/tor/torrc
-if [ "$1" = "-tornode" ]; then
-    shift
+if [ "$TORNODE" = 1 ]; then
     while [ -z "$safecoin_ip" ]; do
         safecoin_ip=$(getent hosts safecoin | awk '{ print $1 }')
     done

@@ -14,8 +14,7 @@ echo
 
 TOR_PROXY=$(getent hosts tor | awk '{ print $1 }')
 if [ ! -z "$TOR_PROXY" ]; then
-    if [ "$1" = "-tornode" ]; then
-        shift
+    if [ "$TORNODE" = 1 ]; then
         EXTRA_ARGS="-proxy=$TOR_PROXY -externalip=$(cat /var/lib/tor/safecoin-node/hostname) -listen -listenonion=0"
     else
         EXTRA_ARGS="-onion=$TOR_PROXY"

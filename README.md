@@ -23,17 +23,22 @@ This is useful for users who needs to circumvent censorship (eg. who lives in Ch
 We have 4 docker-compose files:
 - `docker-compose.yml`: base. This *must* always be included.
 - `docker-compose.safenode.yml`: includes some scripts to help running a SafeNode
-- `docker-compose.tor.yml`: fully run the daemon under Tor. The node will be reachable through a hidden service.
 - `docker-compose.fightcens.yml`: run a [OBFS4 bridge](https://github.com/Yawning/obfs4/blob/master/doc/obfs4-spec.txt) and a [SnowFlake proxy](https://snowflake.torproject.org/) to help fighting censorship. Both are secure to run. You will need to make TCP ports 8772/8773 reachables from the internet **before running the container**.
 
 Choose the ones you need and run:
 ```
-docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.tor.yml] [-f docker-compose.fightcens.yml] build --pull
-docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.tor.yml] [-f docker-compose.fightcens.yml] up -d
+docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] build --pull
+docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] up -d
 ```
-**Warning: file order is important. For example, running `docker-compose -f docker-compose.tor.yml -f docker-compose.yml` would be the same to run `docker-compose -f docker-compose.yml`.**
+To fully run the daemon under Tor, making your node reachable only through a hidden service, set `TORNODE=1` like this:
+```
+TORNODE=1 docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] build --pull
+TORNODE=1 docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] up -d
+```
 
-If you need to run multiple SafeCoin instances, you will have to change `-p <name>` to avoid conflicts.
+**Warning: file order is important!**
+
+To run multiple instances see [running multiple instances](#Running-multiple-instances).
 
 #### [Configure your SafeNode (optional)](https://github.com/Fair-Exchange/safecoin-docker/tree/master/safenode#configure-the-container)
 
@@ -56,7 +61,7 @@ docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.fightcens.ym
 Run again setup will update container's image
 
 #### Running multiple instances
-To run multiple instanced, you'll need to use SAFEPORT chainging the daemon's listening port in order to avoid conflicts with other containers. Example:
+To run multiple instanced, you will have to change `-p <name>` and changing daemon's listening port with `SAFEPORT` in order to avoid conflicts with other containers. Example:
 ```
 SAFEPORT=8774 docker-compose -p safecoin2 -f docker-compose.yml [...] up -d
 ```

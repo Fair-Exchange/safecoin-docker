@@ -30,7 +30,7 @@ fi
 
 read -p "Do you want to create a Tor node [Y/n]: " tor
 if [[ "$tor" =~ ^(Y|y)*$ ]]; then
-    EXTRAFILES="$EXTRAFILES -f docker-compose.tor.yml"
+    TORNODE=1
     SAFEPORT="${SAFEPORT:-$RANDOM}"
 fi
 

@@ -4,14 +4,19 @@ services:
     image: safecoin/safecoin
     depends_on:
       - tor
+    environment:
+      - TORNODE=${TORNODE:-0}
     ports:
       - "${SAFEPORT:-8770}:8770"
     volumes:
       - safecoin-data:/safecoin
+      - tor-data:/var/lib/tor
     restart: unless-stopped
     stop_grace_period: 2m
   tor:
     build: ./tor
+    environment:
+      - TORNODE=${TORNODE:-0}
     volumes:
       - tor-data:/var/lib/tor
     restart: unless-stopped
