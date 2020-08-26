@@ -79,6 +79,17 @@ systemctl enable --now docker-safecoin.service
 ```
 
 ## FAQ
+#### I want to run SafeCoin daemon with custom flags.
+Open `docker-compose.yml` and add `command: <flags>` in safecoin section.
+E.g. if I want to enable debug, I'll add command to my `docker-compose.yml` like that:
+```
+[...]
+  safecoin:
+    image: safecoin/safecoin
+    command: -debug=1
+[...]
+```
+
 #### Something went wrong, how can I see logs?
 ```
 docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.fightcens.yml] logs [-f] <service>
