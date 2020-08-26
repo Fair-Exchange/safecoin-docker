@@ -47,7 +47,8 @@ else
 fi
 echo
 
-docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES build --pull
+docker pull safecoin/safecoin
+docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES build --no-cache
 docker-compose -p $container_prefix -f docker-compose.yml $EXTRAFILES up -d
 
 
@@ -55,11 +56,11 @@ if [[ "$safenode" == [Yy] ]]; then
     echo
     echo "=== SafeNode Setup ==="
     if [ $(docker-compose -p $container_prefix exec safecoin \[ -s /safecoin/.safecoin/safecoin.conf \]) -eq 0 ]; then
-        echo "Your SafeNode seems to be already configured."
-        echo "To reconfigure it, runs: docker-compose -p $container_prefix exec setup-safenode.sh"
+        echo "Your SafeNode seems to be already configured. Skipping this step."
+    else
+        docker-compose -p $container_prefix exec setup-safenode.sh
+        docker-compose -p $container_prefix restart safecoin
     fi
-    docker-compose -p $container_prefix exec setup-safenode.sh
-    docker-compose -p $container_prefix restart safecoin
 fi
 
 echo

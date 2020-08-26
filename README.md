@@ -20,27 +20,49 @@ Run and follow instructions.
 This is useful for users who needs to circumvent censorship (eg. who lives in China).
 
 #### Setup
-We have 4 docker-compose files:
-- `docker-compose.yml`: base. This *must* always be included.
+First of all, be sure to have the latest SafeCoin image:
+```
+docker pull safecoin/safecoin
+```
+Now, we have 4 docker-compose files:
+- `docker-compose.yml`: base. This **must** always be included.
 - `docker-compose.safenode.yml`: includes some scripts to help running a SafeNode
 - `docker-compose.fightcens.yml`: run a [OBFS4 bridge](https://github.com/Yawning/obfs4/blob/master/doc/obfs4-spec.txt) and a [SnowFlake proxy](https://snowflake.torproject.org/) to help fighting censorship. Both are secure to run. You will need to make TCP ports 8772/8773 reachables from the internet **before running the container**.
 
-Choose the ones you need and run:
+Choose the ones you need and build containers' images:
 ```
-docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] build --pull
-docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] up -d
-```
-To fully run the daemon under Tor, making your node reachable only through a hidden service, set `TORNODE=1` like this:
-```
-TORNODE=1 docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] build --pull
-TORNODE=1 docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] up -d
+docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] build --no-cache
 ```
 
-**Warning: file order is important!**
+If you want to fully run the daemon under Tor, making your node reachable only through a hidden service, open `.env` and set `TORNODE=1`.
+
+Run the containers:
+
+```
+docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] up -d
+```
+
+**Warning: file order (`-f <file>`) is important!**
 
 To run multiple instances see [running multiple instances](#Running-multiple-instances).
 
-#### [Configure your SafeNode (optional)](https://github.com/Fair-Exchange/safecoin-docker/tree/master/safenode#configure-the-container)
+#### Check that your daemon is fully running under Tor (only if you set `TORNODE=1`)
+Run:
+```
+docker-compose -p safecoin logs -f safecoin
+```
+After fetching params, you should see something like this:
+```
+safecoin_1  | Initialization completed successfully
+safecoin_1  | 
+safecoin_1  | ****************************************************
+safecoin_1  | Running: safecoind -proxy=172.21.0.2:9050 -externalip=safe6mbkjzzkktnl.onion -listen -listenonion=0 -dnsseed=0
+safecoin_1  | ****************************************************
+```
+Press CTRL+C to exit, the containers will keep running in background.
+
+#### Configure your SafeNode (only if you used `docker-compose.safecoin.yml`)
+See https://github.com/Fair-Exchange/safecoin-docker/tree/master/safenode#configure-the-container
 
 #### Use safecoin-cli
 ```
@@ -94,9 +116,9 @@ E.g. if I want to enable debug, I'll add command to my `docker-compose.yml` like
 ```
 docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.fightcens.yml] logs [-f] <service>
 ```
-You can use `--follow` argument to continue streaming the new output from the container’s STDOUT and STDERR.
+You can use `-f` argument to continue streaming the new output from the container’s STDOUT and STDERR.
 
-You can specify a service name (like `safecoin`) to see only logs related to that container
+You can specify a service (`safecoin`, `tor`, etc...) to see only logs related to that container
 
 #### I sadly need to debug. How can I spawn a shell into the container?
 ```
