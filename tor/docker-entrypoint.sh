@@ -4,8 +4,12 @@ set -e
 
 cp /etc/tor/torrc.default /etc/tor/torrc
 if [ "$TORNODE" = 1 ]; then
-    while [ -z "$safecoin_ip" ]; do
+    while true; do
         safecoin_ip=$(getent hosts safecoin | awk '{ print $1 }')
+        if [ ! -z "$safecoin_ip" ]; then
+            break
+        fi
+        sleep 1
     done
     echo "
 HiddenServiceDir /var/lib/tor/safecoin-node/
