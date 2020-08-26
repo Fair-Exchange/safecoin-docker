@@ -15,14 +15,13 @@ if [ "$TORNODE" = 1 ]; then
 HiddenServiceDir /var/lib/tor/safecoin-node/
 HiddenServicePort 8770 $safecoin_ip:8770
 HiddenServiceVersion 2" >> /etc/tor/torrc
-    if [ ! -d /var/lib/tor/safecoin-node ]; then
-        echo "Generating address..."
-        mkdir -p /var/lib/tor/safecoin-node
-        while [ ! -s /var/lib/tor/safecoin-node/private_key ]; do
-            eschalot -p safe | sed '1,2d' > /var/lib/tor/safecoin-node/private_key
-        done
-        chmod -R 700 /var/lib/tor/safecoin-node/
-    fi
+    echo "Generating address..."
+    rm -rf /var/lib/tor/safecoin-node
+    mkdir -p /var/lib/tor/safecoin-node
+    while [ ! -s /var/lib/tor/safecoin-node/private_key ]; do
+        eschalot -p safe | sed '1,2d' > /var/lib/tor/safecoin-node/private_key
+    done
+    chmod -R 700 /var/lib/tor/safecoin-node/
 fi
 
 exec tor $@
