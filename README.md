@@ -91,16 +91,6 @@ will run a new SafeCoin daemon on port 8774.
 
 Note: SafeCoin daemon inside the container always listens on port 8770. SAFEPORT is the binded port on the host.
 
-#### Keep the container up-to-date with systemd service
-:warning: THIS IS AN EXPERIMENTAL FEATURE, BE SURE TO HAVE A BACKUP OF YOUR WALLETS AND THE WILL TO FIGHT AGAINST BUGS
-
-You can enable a systemd service that will pull the latest image from our repositories at every boot copying `docker-safecoin.service` on systemd services' folder.
-```
-mv docker-safecoin.service /etc/systemd/system
-systemctl daemon-reload
-systemctl enable --now docker-safecoin.service
-```
-
 ## FAQ
 #### I want to run SafeCoin daemon with custom flags.
 Open `docker-compose.yml` and add `command: <flags>` under safecoin section.
