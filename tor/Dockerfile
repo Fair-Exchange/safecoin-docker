@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gpg \
     gpg-agent \
-    libcap2-bin \
     ca-certificates && \
 # See: <https://2019.www.torproject.org/docs/debian.html.en>
     curl https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --import && \
@@ -22,8 +21,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get update && apt-get install -y --no-install-recommends \
     tor \
     obfs4proxy && \
-# Allow obfs4proxy to bind to ports < 1024.
-    setcap cap_net_bind_service=+ep /usr/bin/obfs4proxy && \
 # Clean image
     apt-get purge -y curl gpg gpg-agent && \
     apt-get -y autoremove && apt-get clean && \
