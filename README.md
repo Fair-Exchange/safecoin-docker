@@ -12,19 +12,19 @@ Run and follow instructions.
 ./boostrap-host.sh
 ```
 
-> If you are running a safenode, prefix will be `safenode` not `safecoin`
+> If you are running a SafeNode, default containers' prefix will be `safenode` not `safecoin`
 
 ### Manual setup
 
 #### [Configure OBFS4 bridges (optional)](https://github.com/Fair-Exchange/safecoin-docker/tree/master/tor#use-a-obfs4-bridge-to-circumvent-censorship)
-This is useful for users who needs to circumvent censorship (eg. who lives in China).
+This is useful for users who needs to circumvent censorship (e.g. who lives in China).
 
 #### Setup
 First of all, be sure to have the latest SafeCoin image:
 ```
 docker pull safecoin/safecoin
 ```
-Now, we have 4 docker-compose files:
+Now, we have 3 docker-compose files:
 - `docker-compose.yml`: base. This **must** always be included.
 - `docker-compose.safenode.yml`: includes some scripts to help running a SafeNode
 - `docker-compose.fightcens.yml`: run a [OBFS4 bridge](https://github.com/Yawning/obfs4/blob/master/doc/obfs4-spec.txt) and a [SnowFlake proxy](https://snowflake.torproject.org/) to help fighting censorship. Both are secure to run. You will need to make TCP ports 8772/8773 reachables from the internet **before running the container**.
@@ -34,7 +34,7 @@ Choose the ones you need and build containers' images:
 docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] build --no-cache
 ```
 
-If you want to fully run the daemon under Tor, making your node reachable only through a hidden service, open `.env` and set `TORNODE=1`.
+If you want to fully run the daemon under Tor, making your node reachable only through a hidden service, open `.env` and set `TORNODE=1`. The hidden service's address changes at every restart to avoid fingerprinting.
 
 Run the containers:
 
@@ -42,7 +42,7 @@ Run the containers:
 docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.safenode.yml] [-f docker-compose.fightcens.yml] up -d
 ```
 
-**Warning: file order (`-f <file>`) is important!**
+**Warning: `-f docker-compose.yml` must always be the first file!**
 
 To run multiple instances see [running multiple instances](#Running-multiple-instances).
 
@@ -83,12 +83,13 @@ docker-compose -p safecoin -f docker-compose.yml [-f docker-compose.fightcens.ym
 Run again setup will update container's image
 
 #### Running multiple instances
-To run multiple instanced, you will have to change `-p <name>` and changing daemon's listening port with `SAFEPORT` in order to avoid conflicts with other containers. Example:
+To run multiple instanced, you will have to change `-p <name>` and the daemon's listening port with `SAFEPORT` in order to avoid conflicts with other containers. Example:
 ```
 SAFEPORT=8774 docker-compose -p safecoin2 -f docker-compose.yml [...] up -d
 ```
 will run a new SafeCoin daemon on port 8774.
 
+Note: SafeCoin daemon inside the container always listens on port 8770. SAFEPORT is the binded port on the host.
 
 #### Keep the container up-to-date with systemd service
 :warning: THIS IS AN EXPERIMENTAL FEATURE, BE SURE TO HAVE A BACKUP OF YOUR WALLETS AND THE WILL TO FIGHT AGAINST BUGS
@@ -102,7 +103,7 @@ systemctl enable --now docker-safecoin.service
 
 ## FAQ
 #### I want to run SafeCoin daemon with custom flags.
-Open `docker-compose.yml` and add `command: <flags>` in safecoin section.
+Open `docker-compose.yml` and add `command: <flags>` under safecoin section.
 E.g. if I want to enable debug, I'll add command to my `docker-compose.yml` like that:
 ```
 [...]
