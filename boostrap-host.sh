@@ -30,8 +30,8 @@ fi
 
 read -p "Do you want to create a Tor node [Y/n]: " tor
 if [[ "$tor" =~ ^(Y|y)*$ ]]; then
-    TORNODE=1
-    SAFEPORT="${SAFEPORT:-$RANDOM}"
+    export TORNODE=1
+    export SAFEPORT="${SAFEPORT:-$RANDOM}"
 fi
 
 read -p "Do you live in a location where Tor is censored? [y/N]: " censorship
@@ -42,6 +42,9 @@ else
     read -p "Do you want to help fighting censorship (you will need to make ports 8772/8773 reachables from the internet) [Y/n]: " anticensorship
     if [[ "$anticensorship" =~ ^(Y|y)*$ ]]; then
         read -p "Email address to allow Tor team to contact you if there are problems with your bridge (optional): " EMAIL
+        if [ ! -z "$EMAIL" ]; then
+            export EMAIL=$EMAIL
+        fi
         EXTRAFILES="$EXTRAFILES -f docker-compose.fightcens.yml"
     fi
 fi
@@ -68,8 +71,11 @@ echo "=== Container configuration ===="
 echo "CONTAINER PREFIX: $container_prefix"
 if [[ "$tor" =~ ^(Y|y)*$ ]]; then
     echo -n "TOR NODE ADDRESS: "
-    while [ -z "$tor_address" ]; do
-        tor_address=$(docker-compose -p $container_prefix exec tor cat /var/lib/tor/safecoin-node/hostname 2> /dev/null || echo)
+    while true; do
+        tor_address=$(docker-compose -p $container_prefix exec -T tor cat /var/lib/tor/safecoin-node/hostname 2> /dev/null || echo)
+        if [ ! -z "$tor_address" ]; then
+            break
+        fi
         sleep 1
     done
     echo $tor_address
@@ -81,8 +87,11 @@ while [ ! -z "$(docker-compose -p $container_prefix top safecoin | grep fetch-pa
 done
 
 echo -n "SAFECOIN ADDRESS: "
-while [ ${#safecoin_address} -ne 34 ]; do
-    safecoin_address=$(docker-compose -p $container_prefix exec safecoin safecoin-cli listreceivedbyaddress 0 true | grep address | cut -c17-50)
+while true; do
+    safecoin_address=$(docker-compose -p $container_prefix exec -T safecoin safecoin-cli listreceivedbyaddress 0 true | grep address | cut -c17-50)
+    if [ ${#safecoin_address} -eq 34 ]; then
+        break
+    fi
     sleep 1
 done
 echo $safecoin_address
